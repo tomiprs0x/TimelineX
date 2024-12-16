@@ -26,8 +26,8 @@ jobs:
           
       - uses: actions/checkout@v3 
         with:
-          persist-credentials: true
-          fetch-depth: 0
+          persist-credentials: False
+          fetch-depth: 1
           
       - name: Generate meaningful changes
         run: |
@@ -68,4 +68,5 @@ jobs:
         uses: ad-m/github-push-action@v0.6.0
         with:
           force: true
+          directory: "."
           github_token: ${{ secrets.GITHUB_TOKEN }}
