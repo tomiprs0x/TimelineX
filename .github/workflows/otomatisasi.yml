@@ -1,0 +1,71 @@
+name: OtomatisSasi
+
+on:
+  push:
+    branches:
+      - main
+      
+  schedule:
+    - cron: '0 7,0,11,18 * * *'
+  
+  # Add manual workflow dispatch
+  workflow_dispatch:
+    inputs:
+      commit_reason:
+        description: 'Reason for manual dispatch'
+        required: false
+        default: 'Manual test run'
+
+jobs:
+  auto_commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Global directory configuration
+        run: |
+          git config --global --add safe.directory /github/workspace
+          
+      - uses: actions/checkout@v3 
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          
+      - name: Generate meaningful changes
+        run: |
+          d=`date '+%Y-%m-%dT%H:%M:%SZ'`
+          echo $d > LAST_UPDATED
+          
+          # Add random content to make commits look more natural
+          echo "Manual dispatch run at $d" >> README.md
+          
+          # Log the dispatch reason if provided
+          echo "Dispatch Reason: ${{ github.event.inputs.commit_reason }}" >> dispatch_log.txt
+          
+      - name: Commit changes
+        run: |
+          git config --local user.email "69198533+justTheKai@users.noreply.github.com"
+          git config --local user.name "JustThekai"
+          
+          # More sophisticated commit message array
+          declare -a commit_messages=(
+            "chore: 🔄 Routine system update"
+            "docs: 📝 Update project documentation"
+            "fix: 🐛 Minor system maintenance"
+            "perf: ⚡ Optimize workflow processes"
+            "refactor: 🛠️ Improve code structure"
+            "build: 🏗️ Update dependency management"
+            "ci: 🔧 Enhance continuous integration"
+            "test: 🧪 Add monitoring checkpoints"
+          )
+          
+          # Randomize commit message selection
+          rand=$((RANDOM % ${#commit_messages[@]}))
+          selected_message="${commit_messages[$rand]}"
+          
+          git add -A
+          git commit -m "$selected_message"
+          
+      - name: GitHub Push
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          force: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
